@@ -1,0 +1,2 @@
+help - show help
+help-debug - show help with debug options

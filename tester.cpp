@@ -3,7 +3,7 @@
 #include<windows.h>
 #include<ctime>
 #include<cstdlib>
-int main(){
+int tester(){
 	puts("--TESTOR--\nPress any key...");
 	while(1){
 //		Sleep(900);
