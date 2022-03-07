@@ -4,7 +4,7 @@
 
 nodeInfo::nodeInfo(const unsigned int &typ){
 	type = typ & 65535;
-	if (type & IS_ITEM) {
+	if (type & HAS_ITEM) {
 		info.value = type >> 16;
 		if (type & SPEED_UP) s2 = 'S';
 		if (type & LEVEL_UP) s2 = 'L';
@@ -20,7 +20,7 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 	if (type & BOMB) {
 		s1 = 'B';
 		if (s2 != 'N')
-			typ = B_AND_I_ERROR;
+			type = B_AND_I_ERROR;
 		else {
 			info.bvalue.level = (type >> 16) & 255;
 			info.bvalue.lastTime = type >> 24;
@@ -30,10 +30,10 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 
 nodeInfo node::getDesc(char *Desc){
 	nodeInfo now(type);
-	if(type & 0x8000) sprintf(Desc, "ERROR!\n");
+	if(type & 0x8000) sprintf(Desc, "WARNING: the type is an error\n");
 	sprintf(Desc, "************************\n");
 	sprintf(Desc, "NODE INFORMATION\n");
-	switch (s1) {
+	switch (now.s1) {
 		case 'H':
 			sprintf(Desc, "type: H(HARD_WALL)\n");
 			break;
@@ -41,13 +41,13 @@ nodeInfo node::getDesc(char *Desc){
 			sprintf(Desc, "type: S(SOFT_WALL)\n");
 			break;
 		case 'F':
-			sprintf(Desc, "type: F(FLOOR_BLOCK)\n")
+			sprintf(Desc, "type: F(FLOOR_BLOCK)\n");
 			break;
 		case 'B':
 			sprintf(Desc, "type: B(BOMB) with level:%d and last_time:%d\n", now.info.bvalue.level, now.info.bvalue.lastTime);
 			break;
 	}
-	switch (s2) {
+	switch (now.s2) {
 		case 'S':
 			sprintf(Desc, "item: S(SPEED_UP) with value:%d\n", now.info.value);
 			break;

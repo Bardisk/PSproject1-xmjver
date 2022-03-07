@@ -1,7 +1,12 @@
 #include "maingame.h"
 
+HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+
+mapData mainMap(0);
+
 int main(int argc, char **argv){
 	
+//	setcol(ForeYellow);
 	puts("Welcome into the Game PaoPaoTang(PPT)!");
 	puts("Author: Litrehinn");
 	puts("This is the command line for lanuching or debuging.");
@@ -31,11 +36,28 @@ int main(int argc, char **argv){
 			puts("Not established yet.");
 			continue;
 		}
+		if (strCommand == "load-map"){
+			printf("Index? ");
+			int idx;
+			scanf("%d", &idx);
+			mainMap.load(idx);
+			continue;
+		}
+		if (strCommand == "save-map"){
+			printf("Index? ");
+			int idx;
+			scanf("%d", &idx);
+			mainMap.save(idx);
+			continue;
+		}
 		if (strCommand == "map-edit"){
-			mapEditer();
+			mapEditor editor;
+			editor.main();
 			continue;
 		}
 		puts("Sorry, we haven't such command, try using 'help'.");
 	}
+	
+	CloseHandle(hOutput);
 	return 0;
 }

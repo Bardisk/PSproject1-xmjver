@@ -4,17 +4,25 @@
 #include <windows.h>
 #include <string>
 #include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include "color.h" 
 
 #define MAXMSIZE 10000
 
+//int a;
 struct pair{
 	int x, y;
 	pair(int xx=0, int yy=0) : x(xx), y(yy) {};
 };
 
 //this makes a template string for filename 
-const char [] RAWMNAME = "maps/map .dat";
-const char [] RAWSNAME = "savs/sav .dat";
+const char RAWMNAME[] = "maps/map .dat";
+const char RAWSNAME[] = "savs/sav .dat";
+
+//#define printw(xx) setcol(ForeYellow|ForeInt);printf(xx);rescol()
+#define printw(xx, ...) setcol(ForeYellow|ForeInt),printf(xx, __VA_ARGS__),rescol()
+#define putw(xx) setcol(ForeYellow|ForeInt),puts(xx),rescol()
 
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.

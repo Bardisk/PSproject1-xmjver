@@ -16,9 +16,11 @@ class mapData{
 		mapData(int fidx);
 };
 
-class mapEditer{
+class mapEditor{
 	int refresh();
-	int main();
+	public:
+		pair cur;
+		int main();
 };
 
 #endif
