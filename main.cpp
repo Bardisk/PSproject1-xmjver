@@ -24,6 +24,7 @@ int main(int argc, char **argv){
 				while(fgets(buf, 2000, fp)) printf(buf);
 				puts("");
 			}
+			fclose(fp);
 			continue;
 		}
 		if (strCommand == "help-debug") {

@@ -12,9 +12,13 @@ class mapData{
 		mapData(int N, int M) : szN(N), szM(M) {};
 		int load(int fidx=0);
 		int save(int fidx=0);
+		int draw();
 		mapData(int fidx);
 };
 
-void mapEditer();
+class mapEditer{
+	int refresh();
+	int main();
+};
 
 #endif
