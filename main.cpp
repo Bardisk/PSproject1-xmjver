@@ -31,7 +31,8 @@ int main(int argc, char **argv){
 			continue;
 		}
 		if (strCommand == "map-edit"){
-			
+			mapEditer();
+			continue;
 		}
 		puts("Sorry, we haven't such command, try using 'help'.");
 	}

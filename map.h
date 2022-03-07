@@ -11,7 +11,10 @@ class mapData{
 		mapData() : szN(0), szM(0) {};
 		mapData(int N, int M) : szN(N), szM(M) {};
 		int load(int fidx=0);
+		int save(int fidx=0);
 		mapData(int fidx);
 };
+
+void mapEditer();
 
 #endif

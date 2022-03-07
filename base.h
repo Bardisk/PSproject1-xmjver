@@ -27,6 +27,7 @@ struct nodeInfo{
 	short type;
 	char s1,s2;
 	union{
+		//used for bomb 
 		struct{
 			short lastTime;
 			short level;
