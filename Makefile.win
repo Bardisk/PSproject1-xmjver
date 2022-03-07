@@ -4,9 +4,8 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-RES      = PaoPaoTang_private.res
-OBJ      = map_generator.o main.o tester.o map.o $(RES)
-LINKOBJ  = map_generator.o main.o tester.o map.o $(RES)
+OBJ      = map.o map_generator.o
+LINKOBJ  = map.o map_generator.o
 LIBS     = -L"D:/Program Files/Dev-Cpp/MinGW64/lib" -L"D:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
 INCS     = -I"D:/Program Files/Dev-Cpp/MinGW64/include" -I"D:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"D:/Program Files/Dev-Cpp/MinGW64/include" -I"D:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
@@ -25,18 +24,8 @@ clean: clean-custom
 $(BIN): $(OBJ)
 	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-map_generator.o: map_generator.cpp
-	$(CPP) -c map_generator.cpp -o map_generator.o $(CXXFLAGS)
-
-main.o: main.cpp
-	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
-
-tester.o: tester.cpp
-	$(CPP) -c tester.cpp -o tester.o $(CXXFLAGS)
-
 map.o: map.cpp
 	$(CPP) -c map.cpp -o map.o $(CXXFLAGS)
 
-PaoPaoTang_private.res: PaoPaoTang_private.rc 
-	$(WINDRES) -i PaoPaoTang_private.rc --input-format=rc -o PaoPaoTang_private.res -O coff 
-
+map_generator.o: map_generator.cpp
+	$(CPP) -c map_generator.cpp -o map_generator.o $(CXXFLAGS)
