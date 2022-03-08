@@ -30,6 +30,42 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 	}
 }
 
+int node::changeNode(){
+	char s1, s2;
+	type = 0;
+	printf("Typ? ");
+	scanf(" %c ", s1);
+	switch (s1) {
+		case 'B':
+			int lt, lvl;
+			printf("\tLast Time? ");
+			scanf("%d", &lt);
+			printf("\tLevel?");
+			scanf("%d", &lvl);
+			type = (((lt << 8) | lvl) << 16) | BOMB; 
+			return 0;
+		case 'S':
+			type = SOFT_WALL;
+			break;
+		case 'H':
+			type = HARD_WALL;
+			break;
+		case 'F':
+			type = FLOOR_BLOCK;
+			break;
+		default:
+			puts("Invaild type.");
+			return -1;
+	}
+	printf("Itm? ");
+	scanf(" %c ", s2);
+	switch (s2) {
+		case 'N':
+			break;
+		
+	}
+}
+
 nodeInfo node::getDesc(char *Desc){
 	nodeInfo now(type);
 	if(type & 0x8000) sprintf(Desc, "WARNING: the type is an error\n");

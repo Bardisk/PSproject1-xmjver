@@ -23,7 +23,6 @@ mapData::mapData(int fidx){
 		putw("WARNING: Reading default map failed.");szN = szM = 0;
 	}
 }
-		
 
 int mapData::save(int fidx){
 	char fName[20];
@@ -73,17 +72,39 @@ int mapData::draw(){
 	}
 }
 
-int mapEditor
-
-int mapEditor::edit(){
-	char command[25];
+int mapEditor::refresh(){
 	char tmpPrint[500];
+	system("cls");
+	puts(ineditMode ? "EDITING" : "VIEWING");
+	printf("Now cursor: (%d, %d)\n", cur.x, cur.y);
 	map->mapbuf[cur.calNum()].getDesc(tmpPrint);
 	puts(tmpPrint);
 	map->draw();
-	while (true){
-		
+	return 0;
+}
+
+int mapEditor::edit(){
+	refresh();
+	bool reflag = false;
+	while (true) {
+		if (_kbhit()){
+			char ch = _getch();
+			switch (ch) {
+				case 0x1b: //esc
+					system("cls");
+					puts("Exit from edit mode.");
+					break;
+				case 'I':
+					ineditMode ^= 1;
+					reflag |= 1;
+					break;
+				default:
+					reflag |= ~editInput(ch);
+			}
+		}
+		reflag ? (reflag=refresh()) : 0;
 	}
+	return 0;
 }
 
 int mapEditor::editInput(char x, int conflag){

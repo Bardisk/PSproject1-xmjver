@@ -19,10 +19,11 @@ class mapData{
 
 class mapEditor{
 	mapData *map;
+	bool ineditMode;
 	int refresh();
 	public:
 		cursor cur;
-		mapEditor(mapData *targetMap): map(targetMap), cur(0, 0, targetMap->szN, targetMap->szM) {};
+		mapEditor(mapData *targetMap): map(targetMap), cur(0, 0, targetMap->szN, targetMap->szM), ineditMode(false) {};
 		int editInput(char x, int conflag=0);
 		int edit();
 		int main();

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
+#include <conio.h>
 #include "color.h" 
 
 #define MAXMSIZE 10000

@@ -11,3 +11,5 @@ void mainGame::display(){
 		printf("%s", players[i].getDesc(Desc));
 	}
 }
+
+
