@@ -1,6 +1,8 @@
 #include "map.h"
 
 extern HANDLE hOutput;
+extern CONSOLE_CURSOR_INFO cci;
+extern COORD startUp;
 
 int mapData::load(int fidx){
 	char fName[20];
@@ -11,6 +13,8 @@ int mapData::load(int fidx){
 		printw("WARNING: %s is not found.\n", fName);
 		return -1;
 	}
+	szN = szM = 0;
+	memset(mapbuf, 0, sizeof mapbuf);
 	fread(&szN, sizeof (int), 1, fp);
 	fread(&szM, sizeof (int), 1, fp);
 	fread(mapbuf, sizeof (node), szN*szM, fp);
@@ -40,9 +44,17 @@ int mapData::save(int fidx){
 	return 0;
 }
 
-int mapData::draw(){
+int mapData::draw(drawSettings dss){
 	for (int i = 0; i < szN * szM; i++) {
+		int tmp = dss.calHit(i);
+		int bgcol = (tmp & HIT_CURSOR) ? BackInt : 0; 
 		nodeInfo now = mapbuf[i].getInfo();
+		setcol(0x7 | bgcol);
+		if (tmp & HIT_PLAYER) {
+			putchar(tmp >> 24);
+			rescol();
+			continue;
+		}
 		switch (now.s1) {
 			case 'H':
 				putchar('#');
@@ -51,7 +63,8 @@ int mapData::draw(){
 				putchar('=');
 				break;
 			case 'F':
-				putchar(' ');
+				if (now.s2 == 'N')
+					putchar(' ');
 				break;
 			case 'B':
 				putchar('B');
@@ -69,23 +82,37 @@ int mapData::draw(){
 					break;
 			}
 		if ((i+1) % szM == 0) puts("");
+		rescol();
 	}
+	return 0;
 }
 
-int mapEditor::refresh(){
+int mapEditor::refresh(bool &bsflag){
 	char tmpPrint[500];
-	system("cls");
+	resetCursor();
 	puts(ineditMode ? "EDITING" : "VIEWING");
 	printf("Now cursor: (%d, %d)\n", cur.x, cur.y);
 	map->mapbuf[cur.calNum()].getDesc(tmpPrint);
 	puts(tmpPrint);
-	map->draw();
+	drawSettings dss;
+	dss.addHighlight(&cur);
+	map->draw(dss);
+	//sweep rubbish
+	if (bsflag) {
+		for(int i = 1; i < 10; i++)
+			puts("                    ");
+		bsflag = false;
+		refresh(bsflag);
+	}
 	return 0;
 }
 
 int mapEditor::edit(){
-	refresh();
+	system("cls");
+	hideCursor();
 	bool reflag = false;
+	bool bsflag = false;
+	refresh(bsflag);
 	while (true) {
 		if (_kbhit()){
 			char ch = _getch();
@@ -93,17 +120,27 @@ int mapEditor::edit(){
 				case 0x1b: //esc
 					system("cls");
 					puts("Exit from edit mode.");
-					break;
+					showCursor();
+					return 0;
 				case 'I':
 					ineditMode ^= 1;
 					reflag |= 1;
+					break;
+				case '\r':
+					showCursor();
+					if (!~map->mapbuf[cur.calNum()].changeNode())
+						Sleep(500);
+					hideCursor();
+					reflag |= 1;
+					bsflag |= 1;
 					break;
 				default:
 					reflag |= ~editInput(ch);
 			}
 		}
-		reflag ? (reflag=refresh()) : 0;
+		reflag ? (reflag=refresh(bsflag)) : 0;
 	}
+	showCursor();
 	return 0;
 }
 
@@ -125,7 +162,10 @@ int mapEditor::editInput(char x, int conflag){
 			return cur.le();
 		case 'A':
 			return cur.le();
+		default:
+			return -1;
 	}
+	return 0;
 }
 
 int mapEditor::main(){

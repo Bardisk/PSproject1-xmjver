@@ -1,12 +1,14 @@
 #include "maingame.h"
 
 HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+CONSOLE_CURSOR_INFO cci;
+COORD startUp={0,0};
 
 mapData mainMap(0);
 
 int main(int argc, char **argv){
-	
-//	setcol(ForeYellow);
+	GetConsoleCursorInfo(hOutput, &cci);
+//	setcol(ForeYellow); 
 	puts("Welcome into the Game PaoPaoTang(PPT)!");
 	puts("Author: Litrehinn");
 	puts("This is the command line for lanuching or debuging.");

@@ -3,13 +3,6 @@
 
 #include "map.h"
 
-struct player{
-	cursor pos;
-	int spd, hp, lvl, sco;
-	char Name[15];
-	char* getDesc(char *Desc, int idx=0);
-};
-
 class mainGame{
 	int playerCnt;
 	player players[5];

@@ -20,7 +20,18 @@ struct cursor{
 	inline int le(){return y?(y-=1):-1;}
 	inline int dw(){return x<N-1?(x+=1):-1;}
 	inline int ri(){return y<M-1?(y+=1):-1;}
-	inline int calNum(){return x*N+M;}
+	inline int calNum(){return x*M+y;}
+};
+
+struct player{
+	cursor pos;
+	int spd, hp, lvl, sco;
+	char Name[15], Rpcr;
+	player(char *PName, char PRpcr, cursor Ppos = cursor()): Rpcr(PRpcr){
+		strcpy(Name, PName);
+		pos = Ppos;
+	}
+	char* getDesc(char *Desc, int idx=0);
 };
 
 //this makes a template string for filename 
@@ -30,8 +41,12 @@ const char RAWSNAME[] = "savs/sav .dat";
 //#define printw(xx) setcol(ForeYellow|ForeInt);printf(xx);rescol()
 #define printw(...) setcol(ForeYellow|ForeInt),printf(__VA_ARGS__),rescol()
 #define putw(xx) setcol(ForeYellow|ForeInt),puts(xx),rescol()
+#define putr(xx) setcol(ForeRed|ForeInt),puts(xx),rescol()
 #define fsprintf(string, ...) sprintf(string+strlen(string), __VA_ARGS__)
-
+#define resetCursor() SetConsoleCursorPosition(hOutput, startUp);
+#define hideCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=false, SetConsoleCursorInfo(hOutput,&cci)
+#define showCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=true, SetConsoleCursorInfo(hOutput,&cci)
+ 
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.
 //for others higher 16 bits accounts for value.
@@ -57,16 +72,25 @@ struct nodeInfo{
 	nodeInfo(const unsigned int &typ);
 };
 
+#define HIT_PLAYER 0x01
+#define HIT_CURSOR 0x02
 struct drawSettings{
-	
+	int playersCnt, highlightsCnt;
+	player *players[10];
+	cursor *highlights[10];
+	public:
+		drawSettings(): playersCnt(0), highlightsCnt(0) {};
+		player* addPlayer(player *now);
+		cursor* addHighlight(cursor *now);
+		int calHit(int pos);
 };
-//8Byte
 
 struct node{
 	unsigned int type;
 	node(const unsigned int &t=0) : type(t) {};
 	inline nodeInfo getInfo(){return nodeInfo(type);};
 	nodeInfo getDesc(char *Desc);
+	int changeNode();
 };
 //4Byte
 
