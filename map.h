@@ -3,11 +3,12 @@
 #include "base.h"
 class mapData{
 	//data members
-	int szN, szM;
-	node mapbuf[MAXMSIZE];
-	
-	//public methods
 	public:
+		int szN, szM;
+		node mapbuf[MAXMSIZE];
+	
+		//public methods
+	
 		mapData() : szN(0), szM(0) {};
 		mapData(int N, int M) : szN(N), szM(M) {};
 		int load(int fidx=0);
@@ -17,9 +18,13 @@ class mapData{
 };
 
 class mapEditor{
+	mapData *map;
 	int refresh();
 	public:
-		pair cur;
+		cursor cur;
+		mapEditor(mapData *targetMap): map(targetMap), cur(0, 0, targetMap->szN, targetMap->szM) {};
+		int editInput(char x, int conflag=0);
+		int edit();
 		int main();
 };
 

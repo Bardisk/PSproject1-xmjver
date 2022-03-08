@@ -19,10 +19,11 @@ int mapData::load(int fidx){
 }
 
 mapData::mapData(int fidx){
-	if (load(fidx) == -1)
-		putw("WARNING: Reading default map failed.");
-	szN = szM = 0;
+	if (load(fidx) == -1){
+		putw("WARNING: Reading default map failed.");szN = szM = 0;
+	}
 }
+		
 
 int mapData::save(int fidx){
 	char fName[20];
@@ -56,6 +57,8 @@ int mapData::draw(){
 			case 'B':
 				putchar('B');
 				break;
+			case 'U':
+				putchar('U');
 		}
 		if (now.s1 == 'F')
 			switch (now.s2) {
@@ -70,6 +73,40 @@ int mapData::draw(){
 	}
 }
 
+int mapEditor
+
+int mapEditor::edit(){
+	char command[25];
+	char tmpPrint[500];
+	map->mapbuf[cur.calNum()].getDesc(tmpPrint);
+	puts(tmpPrint);
+	map->draw();
+	while (true){
+		
+	}
+}
+
+int mapEditor::editInput(char x, int conflag){
+	switch(x){
+		case 'w':
+			return cur.up();
+		case 'W':
+			return cur.up();
+		case 'd':
+			return cur.ri();
+		case 'D':
+			return cur.ri();
+		case 's':
+			return cur.dw();
+		case 'S':
+			return cur.dw();
+		case 'a':
+			return cur.le();
+		case 'A':
+			return cur.le();
+	}
+}
+
 int mapEditor::main(){
 	system("cls");
 	puts("This is the command line of mapEditor.");
@@ -81,7 +118,32 @@ int mapEditor::main(){
 		}
 		std::string strCommand(command);
 		if (strCommand == "edit") {
-			puts("Not established yet.");
+			edit();
+			continue;
+		}
+		if (strCommand == "setSz") {
+			printf("N = ");
+			int N;
+			scanf("%d", &N);
+			printf("M = ");
+			int M;
+			scanf("%d", &M);
+			map->szN = cur.N = N;
+			map->szM = cur.M = M;
+			continue;
+		}
+		if (strCommand == "load"){
+			printf("Index? ");
+			int idx;
+			scanf("%d", &idx);
+			map->load(idx);
+			continue;
+		}
+		if (strCommand == "save"){
+			printf("Index? ");
+			int idx;
+			scanf("%d", &idx);
+			map->save(idx);
 			continue;
 		}
 		puts("Invaild Command");

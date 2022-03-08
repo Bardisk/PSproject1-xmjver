@@ -4,7 +4,7 @@
 #include "map.h"
 
 struct player{
-	pair pos;
+	cursor pos;
 	int spd, hp, lvl, sco;
 	char Name[15];
 	char* getDesc(char *Desc, int idx=0);

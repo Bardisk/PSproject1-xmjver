@@ -51,7 +51,7 @@ int main(int argc, char **argv){
 			continue;
 		}
 		if (strCommand == "map-edit"){
-			mapEditor editor;
+			mapEditor editor(&mainMap);
 			editor.main();
 			continue;
 		}

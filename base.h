@@ -11,9 +11,15 @@
 #define MAXMSIZE 10000
 
 //int a;
-struct pair{
+struct cursor{
 	int x, y;
-	pair(int xx=0, int yy=0) : x(xx), y(yy) {};
+	int N, M;
+	cursor(int xx=0, int yy=0, int nn=0, int mm=0) : x(xx), y(yy), N(nn), M(mm) {};
+	inline int up(){return x?(x-=1):-1;}
+	inline int le(){return y?(y-=1):-1;}
+	inline int dw(){return x<N-1?(x+=1):-1;}
+	inline int ri(){return y<M-1?(y+=1):-1;}
+	inline int calNum(){return x*N+M;}
 };
 
 //this makes a template string for filename 
@@ -21,8 +27,9 @@ const char RAWMNAME[] = "maps/map .dat";
 const char RAWSNAME[] = "savs/sav .dat";
 
 //#define printw(xx) setcol(ForeYellow|ForeInt);printf(xx);rescol()
-#define printw(xx, ...) setcol(ForeYellow|ForeInt),printf(xx, __VA_ARGS__),rescol()
+#define printw(...) setcol(ForeYellow|ForeInt),printf(__VA_ARGS__),rescol()
 #define putw(xx) setcol(ForeYellow|ForeInt),puts(xx),rescol()
+#define fsprintf(string, ...) sprintf(string+strlen(string), __VA_ARGS__)
 
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.
@@ -47,6 +54,10 @@ struct nodeInfo{
 		int value;
 	}info;
 	nodeInfo(const unsigned int &typ);
+};
+
+struct drawSettings{
+	
 };
 //8Byte
 
