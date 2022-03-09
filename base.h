@@ -10,6 +10,8 @@
 #include "color.h" 
 
 #define MAXMSIZE 10000
+#define GAMETICK 100
+#define CURSOR_SPEED 16
 
 //int a;
 class mapData;
@@ -48,6 +50,8 @@ const char RAWSNAME[] = "savs/sav .dat";
 #define resetCursor() SetConsoleCursorPosition(hOutput, startUp);
 #define hideCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=false, SetConsoleCursorInfo(hOutput,&cci)
 #define showCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=true, SetConsoleCursorInfo(hOutput,&cci)
+#define exitRealTime() isRealTimeMode = false
+#define enterRealTime() lastLoadedTime = lastRespondTime = clock(), tickCntSinceLoaded = 1, isRealTimeMode = true
  
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.

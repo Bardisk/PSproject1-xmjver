@@ -4,10 +4,14 @@ HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_CURSOR_INFO cci;
 COORD startUp={0,0};
 
+bool isRealTimeMode = false;
+clock_t lastRespondTime, lastLoadedTime;
+int tickCntSinceLoaded = 0;
+
 mapData mainMap(0);
 
 int main(int argc, char **argv){
-	GetConsoleCursorInfo(hOutput, &cci);
+//	GetConsoleCursorInfo(hOutput, &cci);
 //	setcol(ForeYellow); 
 	puts("Welcome into the Game PaoPaoTang(PPT)!");
 	puts("Author: Litrehinn");
@@ -55,6 +59,15 @@ int main(int argc, char **argv){
 		if (strCommand == "map-edit"){
 			mapEditor editor(&mainMap);
 			editor.main();
+			continue;
+		}
+		if (strCommand == "load") {
+			continue;
+		}
+		if (strCommand == "save") {
+			continue;
+		}
+		if (strCommand == "game") {
 			continue;
 		}
 		puts("Sorry, we haven't such command, try using 'help'.");

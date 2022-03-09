@@ -4,6 +4,11 @@ extern HANDLE hOutput;
 extern CONSOLE_CURSOR_INFO cci;
 extern COORD startUp;
 
+extern bool isRealTimeMode;
+extern clock_t lastRespondTime, lastLoadedTime;
+extern int tickCntSinceLoaded;
+
+
 void cursor::renew(mapData *map) {N = map ->szN; M = map -> szM;}
 
 int mapData::load(int fidx){
@@ -92,7 +97,7 @@ int mapData::draw(drawSettings dss){
 }
 
 int mapData::revs(){
-	node tmpbuf[100005];
+	node tmpbuf[MAXMSIZE];
 	std::swap(szN, szM);
 	for (int i = 0; i < szN * szM; i++)
 		tmpbuf[i] = mapbuf[i];
@@ -105,7 +110,7 @@ int mapData::revs(){
 int mapEditor::refresh(bool &bsflag){
 	char tmpPrint[500];
 	resetCursor();
-	puts(ineditMode ? "EDITING" : "VIEWING");
+	printf("Avg Tick: %8.4lf ms\n", (clock() - lastLoadedTime)/(double) tickCntSinceLoaded);
 	printf("Now cursor: (%2d, %2d)\n", cur.x, cur.y);
 	map->mapbuf[cur.calNum()].getDesc(tmpPrint);
 	puts(tmpPrint);
@@ -123,18 +128,29 @@ int mapEditor::refresh(bool &bsflag){
 }
 
 int mapEditor::edit(){
+	FILE *flog = fopen("realtimelog.txt", "w");
+	fprintf(flog, "%lld\n", time(0));
 	system("cls");
 	hideCursor();
+	enterRealTime();
 	bool reflag = false;
 	bool bsflag = false;
 	refresh(bsflag);
 	while (true) {
+		clock_t nowt = clock();
+		if (nowt - lastRespondTime < GAMETICK)
+			continue;
+		++tickCntSinceLoaded;
+		fprintf(flog, "tick: %d, timegap: %ld\n", tickCntSinceLoaded, nowt - lastRespondTime);
+		lastRespondTime = nowt;
 		if (_kbhit()){
 			char ch = _getch();
 			switch (ch) {
 				case 0x1b: //esc
 					system("cls");
 					puts("Exit from edit mode.");
+					exitRealTime();
+					fclose(flog);
 					showCursor();
 					return 0;
 				case 'I':
@@ -143,9 +159,11 @@ int mapEditor::edit(){
 					break;
 				case '\r':
 					showCursor();
+					exitRealTime();
 					if (!~map->mapbuf[cur.calNum()].changeNode())
 						Sleep(500);
 					hideCursor();
+					enterRealTime(); 
 					reflag |= 1;
 					bsflag |= 1;
 					break;
@@ -155,6 +173,8 @@ int mapEditor::edit(){
 		}
 		reflag ? (reflag=refresh(bsflag)) : 0;
 	}
+	fclose(flog);
+	exitRealTime(); 
 	showCursor();
 	return 0;
 }
