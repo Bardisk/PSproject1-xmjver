@@ -30,6 +30,14 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 			info.bvalue.lastTime = typ >> 24;
 		}
 	}
+	if (type & WAVE) {
+		if (s2 != 'N')
+			type = B_AND_I_ERROR;
+		else {
+			info.bvalue.level = 0;
+			info.bvalue.lastTime = typ >> 24;
+		}
+	}
 }
 
 int node::changeNode(){

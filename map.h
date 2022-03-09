@@ -14,6 +14,7 @@ class mapData{
 		int load(int fidx=0);
 		int save(int fidx=0);
 		int draw(drawSettings dss=drawSettings());
+		int revs();
 		mapData(int fidx);
 };
 

@@ -4,6 +4,8 @@ extern HANDLE hOutput;
 extern CONSOLE_CURSOR_INFO cci;
 extern COORD startUp;
 
+void cursor::renew(mapData *map) {N = map ->szN; M = map -> szM;}
+
 int mapData::load(int fidx){
 	char fName[20];
 	strcpy(fName, RAWMNAME);
@@ -81,9 +83,22 @@ int mapData::draw(drawSettings dss){
 					putchar('L');
 					break;
 			}
-		if ((i+1) % szM == 0) puts("");
 		rescol();
+		putchar(' ');
+		if ((i+1) % szM == 0) puts("");
+		
 	}
+	return 0;
+}
+
+int mapData::revs(){
+	node tmpbuf[100005];
+	std::swap(szN, szM);
+	for (int i = 0; i < szN * szM; i++)
+		tmpbuf[i] = mapbuf[i];
+	for (int i = 0; i < szN; i++)
+		for(int j = 0; j < szM; j++)
+			mapbuf[i * szM + j] = tmpbuf[j * szN + i];
 	return 0;
 }
 
@@ -91,7 +106,7 @@ int mapEditor::refresh(bool &bsflag){
 	char tmpPrint[500];
 	resetCursor();
 	puts(ineditMode ? "EDITING" : "VIEWING");
-	printf("Now cursor: (%d, %d)\n", cur.x, cur.y);
+	printf("Now cursor: (%2d, %2d)\n", cur.x, cur.y);
 	map->mapbuf[cur.calNum()].getDesc(tmpPrint);
 	puts(tmpPrint);
 	drawSettings dss;
@@ -193,20 +208,27 @@ int mapEditor::main(){
 			map->szM = cur.M = M;
 			continue;
 		}
-		if (strCommand == "load"){
+		if (strCommand == "load") {
 			printf("Index? ");
 			int idx;
 			scanf("%d", &idx);
 			map->load(idx);
+			cur.renew(map);
 			continue;
 		}
-		if (strCommand == "save"){
+		if (strCommand == "save") {
 			printf("Index? ");
 			int idx;
 			scanf("%d", &idx);
 			map->save(idx);
 			continue;
 		}
+		if (strCommand == "revs") {
+			map->revs();
+			std::swap(cur.x, cur.y);
+			std::swap(cur.N, cur.M);
+			continue;
+		} 
 		puts("Invaild Command");
 	}
 	system("cls");

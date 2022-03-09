@@ -12,6 +12,7 @@
 #define MAXMSIZE 10000
 
 //int a;
+class mapData;
 struct cursor{
 	int x, y;
 	int N, M;
@@ -20,6 +21,7 @@ struct cursor{
 	inline int le(){return y?(y-=1):-1;}
 	inline int dw(){return x<N-1?(x+=1):-1;}
 	inline int ri(){return y<M-1?(y+=1):-1;}
+	void renew(mapData *map);
 	inline int calNum(){return x*M+y;}
 };
 
@@ -50,13 +52,14 @@ const char RAWSNAME[] = "savs/sav .dat";
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.
 //for others higher 16 bits accounts for value.
-#define FLOOR_BLOCK 0x00000001
-#define HARD_WALL 0x00000002
-#define SOFT_WALL 0x00000004
-#define BOMB 0x00000008
-#define HAS_ITEM 0x00000010
-#define SPEED_UP 0x00000020
-#define LEVEL_UP 0x00000040
+#define FLOOR_BLOCK 0x0001
+#define HARD_WALL 0x0002
+#define SOFT_WALL 0x0004
+#define BOMB 0x0008
+#define HAS_ITEM 0x0010
+#define SPEED_UP 0x0020
+#define LEVEL_UP 0x0040
+#define WAVE 0x0080
 
 struct nodeInfo{
 	short type;
