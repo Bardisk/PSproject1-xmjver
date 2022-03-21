@@ -3,20 +3,10 @@
 #include<windows.h>
 #include<ctime>
 #include<cstdlib>
-int tester(){
-	puts("--TESTOR--\nPress any key...");
-	while(1){
-//		Sleep(900);
-		if(_kbhit()){
-			char ch=_getch();
-			if(ch==0x1b){
-				puts("The program is terminating...");
-				Sleep(500);
-				break;
-			}
-			system("cls");
-			puts("--TESTOR--\nPress any key...");
-			printf("u've pressed: %c \n",ch);
-		}
-	}
+int main(){
+	HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD mode;
+	GetConsoleMode(hOutput, &mode);
+	SetConsoleMode(hOutput, mode|0x0004);
+	printf("\033[%dm\n",94);
 }

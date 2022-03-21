@@ -15,6 +15,7 @@ class mapData{
 		int save(int fidx=0);
 		int draw(drawSettings dss=drawSettings());
 		int revs();
+		int check();
 		mapData(int fidx);
 };
 
@@ -22,9 +23,11 @@ class mapEditor{
 	mapData *map;
 	bool ineditMode;
 	int refresh(bool &bsflag);
+	int moveCounter;
 	public:
 		cursor cur;
-		mapEditor(mapData *targetMap): map(targetMap), ineditMode(false), cur(0, 0, targetMap->szN, targetMap->szM) {};
+		cursor lst;
+		mapEditor(mapData *targetMap): map(targetMap), ineditMode(false), moveCounter(0), cur(0, 0, targetMap->szN, targetMap->szM), lst(cur) {};
 		int editInput(char x, int conflag=0);
 		int edit();
 		int main();

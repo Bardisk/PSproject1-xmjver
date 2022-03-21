@@ -1,13 +1,13 @@
 #include "map.h"
 
+extern char buff[];
 extern HANDLE hOutput;
 extern CONSOLE_CURSOR_INFO cci;
 extern COORD startUp;
 
 extern bool isRealTimeMode;
 extern clock_t lastRespondTime, lastLoadedTime;
-extern int tickCntSinceLoaded;
-
+extern int tickCntSinceLoaded; 
 
 void cursor::renew(mapData *map) {N = map ->szN; M = map -> szM;}
 
@@ -51,33 +51,54 @@ int mapData::save(int fidx){
 	return 0;
 }
 
+int mapData::check(){
+	for (int i = 0; i < szN * szM; i++) {
+		if (!mapbuf[i].type) return -1;
+	}
+	return 0;
+}
+
 int mapData::draw(drawSettings dss){
 	for (int i = 0; i < szN * szM; i++) {
 		int tmp = dss.calHit(i);
-		int bgcol = (tmp & HIT_CURSOR) ? BackInt : 0; 
+		int bgcol = ((tmp & HIT_CURSOR)) ? Back + Intense : 0; 
 		nodeInfo now = mapbuf[i].getInfo();
-		setcol(0x7 | bgcol);
+		setcol(bgcol);
 		if (tmp & HIT_PLAYER) {
-			putchar(tmp >> 24);
+			setcol((tmp >> 16) & 255);
+//			setcol(Back + Intense);
+			setcol(4);
+			putchar((char) ((tmp >> 8) & 255));
 			rescol();
+			putchar(' ');
 			continue;
 		}
 		switch (now.s1) {
 			case 'H':
+				setcol(Fore+Yellow+Intense);
 				putchar('#');
 				break;
 			case 'S':
+				setcol(Fore+Yellow);
 				putchar('=');
 				break;
 			case 'F':
 				if (now.s2 == 'N')
 					putchar(' ');
+				else 
+					setcol(Fore+Cyan+Intense);
 				break;
 			case 'B':
-				putchar('B');
+				setcol(Fore+Intense+Red);
+				putchar('@');
+				break;
+			case 'W':
+				setcol(Fore+Red);
+				putchar('*');
 				break;
 			case 'U':
 				putchar('U');
+				break;
 		}
 		if (now.s1 == 'F')
 			switch (now.s2) {
@@ -109,28 +130,30 @@ int mapData::revs(){
 
 int mapEditor::refresh(bool &bsflag){
 	char tmpPrint[500];
-	resetCursor();
+//	resetCursor();
+	cls();
 	printf("Avg Tick: %8.4lf ms\n", (clock() - lastLoadedTime)/(double) tickCntSinceLoaded);
 	printf("Now cursor: (%2d, %2d)\n", cur.x, cur.y);
 	map->mapbuf[cur.calNum()].getDesc(tmpPrint);
 	puts(tmpPrint);
+	
 	drawSettings dss;
-	dss.addHighlight(&cur);
+	if (moveCounter <= 1*CURSOR_SPEED/20)
+		dss.addHighlight(&cur);
+	if (moveCounter > (5*CURSOR_SPEED+19)/20)
+		dss.addHighlight(&lst);
 	map->draw(dss);
+	fflush(stdout);
 	//sweep rubbish
-	if (bsflag) {
-		for(int i = 1; i < 10; i++)
-			puts("                    ");
-		bsflag = false;
-		refresh(bsflag);
-	}
 	return 0;
 }
 
 int mapEditor::edit(){
 	FILE *flog = fopen("realtimelog.txt", "w");
 	fprintf(flog, "%lld\n", time(0));
-	system("cls");
+	cls();
+	
+	SenterRealTime();
 	hideCursor();
 	enterRealTime();
 	bool reflag = false;
@@ -143,15 +166,23 @@ int mapEditor::edit(){
 		++tickCntSinceLoaded;
 		fprintf(flog, "tick: %d, timegap: %ld\n", tickCntSinceLoaded, nowt - lastRespondTime);
 		lastRespondTime = nowt;
+		if (moveCounter) {
+			bool flagtmp = (moveCounter <= 1*CURSOR_SPEED/20 || moveCounter > (5*CURSOR_SPEED+19)/20);
+			--moveCounter;
+			flagtmp ^= (moveCounter <= 1*CURSOR_SPEED/20 || moveCounter > (5*CURSOR_SPEED+19)/20);
+			reflag |= flagtmp;
+		}
+			
 		if (_kbhit()){
 			char ch = _getch();
 			switch (ch) {
 				case 0x1b: //esc
-					system("cls");
+					cls();
 					puts("Exit from edit mode.");
 					exitRealTime();
 					fclose(flog);
 					showCursor();
+					SexitRealTime(); 
 					return 0;
 				case 'I':
 					ineditMode ^= 1;
@@ -160,9 +191,11 @@ int mapEditor::edit(){
 				case '\r':
 					showCursor();
 					exitRealTime();
+					fflush(stdout),setvbuf(stdout,buff,_IONBF,4096);
 					if (!~map->mapbuf[cur.calNum()].changeNode())
 						Sleep(500);
 					hideCursor();
+					setvbuf(stdout,buff,_IOFBF,4096);
 					enterRealTime(); 
 					reflag |= 1;
 					bsflag |= 1;
@@ -174,12 +207,19 @@ int mapEditor::edit(){
 		reflag ? (reflag=refresh(bsflag)) : 0;
 	}
 	fclose(flog);
-	exitRealTime(); 
+	exitRealTime();
 	showCursor();
+	SexitRealTime(); 
+	
 	return 0;
 }
 
 int mapEditor::editInput(char x, int conflag){
+	//reject to respond in some ticks
+//	static int cnt = 0;
+	if (moveCounter) return -1;
+	moveCounter = CURSOR_SPEED - 1;
+	lst = cur;
 	switch(x){
 		case 'w':
 			return cur.up();
@@ -204,7 +244,7 @@ int mapEditor::editInput(char x, int conflag){
 }
 
 int mapEditor::main(){
-	system("cls");
+	cls();
 	puts("This is the command line of mapEditor.");
 	char command[25];
 	while (~(printf("mapEdit>> "), scanf("%s", command))){
@@ -251,7 +291,7 @@ int mapEditor::main(){
 		} 
 		puts("Invaild Command");
 	}
-	system("cls");
+	cls();
 	puts("Exiting from mapEditor...");
 	return 0;
 }

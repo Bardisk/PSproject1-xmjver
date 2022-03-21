@@ -4,11 +4,13 @@ HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_CURSOR_INFO cci;
 COORD startUp={0,0};
 
+char buff[4096];
 bool isRealTimeMode = false;
 clock_t lastRespondTime, lastLoadedTime;
 int tickCntSinceLoaded = 0;
 
 mapData mainMap(0);
+mainGame game;
 
 int main(int argc, char **argv){
 //	GetConsoleCursorInfo(hOutput, &cci);
@@ -17,6 +19,18 @@ int main(int argc, char **argv){
 	puts("Author: Litrehinn");
 	puts("This is the command line for lanuching or debuging.");
 	char command[25];
+	DWORD mode;
+	GetConsoleMode(hOutput, &mode);
+	SetConsoleMode(hOutput, mode|0x0004);
+	//hideCursor();
+//	printf("\033[?25l");
+//	printf("%d\n",stdout);
+//	SenterRealTime();
+//	setvbuf(stdout, buff, _IOFBF, 4096);
+//	printf("%d\n",stdout);
+//	system("pause");
+//	SexitRealTime();
+//	fflush(stdout);
 	while (~(printf(">> "), scanf("%s", command))){
 		if (strlen(command) >= 15) {
 			puts("Too long! Try using 'help' to get available commands.");
@@ -42,32 +56,48 @@ int main(int argc, char **argv){
 			puts("Not established yet.");
 			continue;
 		}
-		if (strCommand == "load-map"){
+		if (strCommand == "load-map") {
 			printf("Index? ");
 			int idx;
 			scanf("%d", &idx);
 			mainMap.load(idx);
 			continue;
 		}
-		if (strCommand == "save-map"){
+		if (strCommand == "save-map") {
 			printf("Index? ");
 			int idx;
 			scanf("%d", &idx);
 			mainMap.save(idx);
 			continue;
 		}
-		if (strCommand == "map-edit"){
+		if (strCommand == "map-edit") {
 			mapEditor editor(&mainMap);
 			editor.main();
 			continue;
 		}
+		
+		if (strCommand == "load-into") {
+			game.loadMap(&mainMap);
+			continue;
+		}
+		
 		if (strCommand == "load") {
+			printf("Index? ");
+			int idx;
+			scanf("%d", &idx);
+			game.load(idx);
 			continue;
 		}
 		if (strCommand == "save") {
+			printf("Index? ");
+			int idx;
+			scanf("%d", &idx);
+			game.save(idx);
 			continue;
 		}
 		if (strCommand == "game") {
+			game.loadMap(&mainMap);
+			game.main();
 			continue;
 		}
 		puts("Sorry, we haven't such command, try using 'help'.");

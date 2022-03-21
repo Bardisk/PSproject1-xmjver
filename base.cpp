@@ -4,6 +4,14 @@
 
 extern HANDLE hOutput;
 
+void setcol(int col){
+	char colCom[50];
+	sprintf(colCom,"\033[%dm",col);
+	printf(colCom);
+	return ;
+}
+
+
 nodeInfo::nodeInfo(const unsigned int &typ){
 	type = typ & 65535;
 	if (type & HAS_ITEM) {
@@ -31,6 +39,7 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 		}
 	}
 	if (type & WAVE) {
+		s1 = 'W';
 		if (s2 != 'N')
 			type = B_AND_I_ERROR;
 		else {
@@ -55,6 +64,9 @@ int node::changeNode(){
 			type = (((lt << 8) | lvl) << 16) | BOMB; 
 			break;
 		}
+		case 'W': 
+			type = WAVE;
+			break;
 		case 'S':
 			type = SOFT_WALL;
 			break;
@@ -145,7 +157,7 @@ int drawSettings::calHit(int pos){
 	int ans = 0;
 	for (int i = 0; i < playersCnt; i++) {
 		if (players[i]->pos.calNum() == pos)
-			ans |= HIT_PLAYER | (players[i]->Rpcr << 24);
+			ans |= HIT_PLAYER | (players[i]->Rpcr << 8) | (players[i]->col << 16);
 	}
 	for (int i = 0; i < highlightsCnt; i++){
 		if (highlights[i]->calNum() == pos)

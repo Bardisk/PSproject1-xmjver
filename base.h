@@ -10,8 +10,8 @@
 #include "color.h" 
 
 #define MAXMSIZE 10000
-#define GAMETICK 100
-#define CURSOR_SPEED 16
+#define GAMETICK 25
+#define CURSOR_SPEED 10
 
 //int a;
 class mapData;
@@ -27,15 +27,27 @@ struct cursor{
 	inline int calNum(){return x*M+y;}
 };
 
+struct keycatcher{
+	
+};
+
 struct player{
 	cursor pos;
 	int spd, hp, lvl, sco;
 	char Name[15], Rpcr;
-	player(char *PName, char PRpcr, cursor Ppos = cursor()): Rpcr(PRpcr){
-		strcpy(Name, PName);
+	int col; 
+	player(const char *PName = NULL, char PRpcr = '$', int col = 0, cursor Ppos = cursor()): Rpcr(PRpcr){
+		if (!PName) sprintf(Name, "Default Name");
+		else strcpy(Name, PName);
 		pos = Ppos;
+		spd = 10;
+		hp = 3;
+		lvl = 1;
+		sco = 0;
+		this->col = col;
 	}
 	char* getDesc(char *Desc, int idx=0);
+	char getHit(char s);
 };
 
 //this makes a template string for filename 
@@ -43,16 +55,21 @@ const char RAWMNAME[] = "maps/map .dat";
 const char RAWSNAME[] = "savs/sav .dat";
 
 //#define printw(xx) setcol(ForeYellow|ForeInt);printf(xx);rescol()
-#define printw(...) setcol(ForeYellow|ForeInt),printf(__VA_ARGS__),rescol()
-#define putw(xx) setcol(ForeYellow|ForeInt),puts(xx),rescol()
-#define putr(xx) setcol(ForeRed|ForeInt),puts(xx),rescol()
+#define printw(...) setcol(Yellow+Intense+Fore),printf(__VA_ARGS__),rescol()
+#define putw(xx) setcol(Yellow+Intense+Fore),puts(xx),rescol()
+#define putr(xx) setcol(Red+Fore+Intense),puts(xx),rescol()
 #define fsprintf(string, ...) sprintf(string+strlen(string), __VA_ARGS__)
 #define resetCursor() SetConsoleCursorPosition(hOutput, startUp);
-#define hideCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=false, SetConsoleCursorInfo(hOutput,&cci)
-#define showCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=true, SetConsoleCursorInfo(hOutput,&cci)
+//#define hideCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=false, SetConsoleCursorInfo(hOutput,&cci)
+//#define showCursor() GetConsoleCursorInfo(hOutput,&cci), cci.bVisible=true, SetConsoleCursorInfo(hOutput,&cci)
+#define hideCursor() printf("\033[?25l")
+#define showCursor() printf("\033[?25h")
 #define exitRealTime() isRealTimeMode = false
 #define enterRealTime() lastLoadedTime = lastRespondTime = clock(), tickCntSinceLoaded = 1, isRealTimeMode = true
- 
+#define cls() printf("\033[H\033[2J\033[3J")
+#define SenterRealTime() printf("\033[?1049h"),cls(),setvbuf(stdout,buff,_IOFBF,4096)
+#define SexitRealTime() printf("\033[?1049l"),fflush(stdout),setvbuf(stdout,buff,_IONBF,4096);
+
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.
 //for others higher 16 bits accounts for value.
