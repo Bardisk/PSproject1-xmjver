@@ -95,27 +95,57 @@ void mainGame::refresh(){
 		printf(tmpdesc);
 	}
 	drawSettings dss;
-	for (int i = 0; i < playerCnt; i++)
+	for (int i = 0; i < playerCnt; i++){
+		if (players[i].hp <= 0) continue;
 		dss.addPlayer(&players[i]);
+	}
 	gameMap->draw(dss);
 	fflush(stdout);
 	return ;
 }
 
-void mainGame::realTimeDealing(){
-	for (int i = 0; i < playerCnt; i++)
+int mainGame::realTimeDealing(){
+	int aliveCnt = 0;
+	for (int i = 0; i < playerCnt; i++) {
 		if (players[i].movCnt) --players[i].movCnt;
+		if (players[i].hp > 0) {
+			++aliveCnt;
+			aliveP = i;
+		}
+	}
+	if (aliveCnt == 1) {
+		return -1;
+	}
+	if (aliveCnt == 0) {
+		return -2;
+	}
 	for (int i = 0; i < gameMap->szN * gameMap->szM; i++) {
 		if (gameMap->mapbuf[i].type & BOMB) {
 			gameMap->mapbuf[i].type -= (1 << 24);
 			if (!(gameMap->mapbuf[i].type >> 24)){
-				gameMap->mapbuf[i].type ^= BOMB;
+				gameMap->triggerBomb(cursor(i/gameMap->szM, i%gameMap->szM, gameMap->szN, gameMap->szM));
 				//to-do
 				reflag = true;
 			}
 		}
+		if (gameMap->mapbuf[i].type & WAVE){
+			for (int j = 0; j < playerCnt; j++) {
+				if (players[j].pos.calNum() == i){
+					if (players[j].hp) {
+						if(!(--players[j].hp)) {
+							reflag = true;
+						}
+					}
+				}
+			}
+			gameMap->mapbuf[i].type -= (1 << 24);
+			if (!(gameMap->mapbuf[i].type >> 24)){
+				gameMap->mapbuf[i].type ^= WAVE | FLOOR_BLOCK;
+				reflag = true;
+			}	
+		}
 	}
-	return ;
+	return 0;
 }
 
 int mainGame::main(){
@@ -134,8 +164,22 @@ int mainGame::main(){
 		++tickCntSinceLoaded;
 		fprintf(flog, "tick: %d, timegap: %ld\n", tickCntSinceLoaded, nowt - lastRespondTime);
 		lastRespondTime = nowt;
-		realTimeDealing();
+		int tmp = realTimeDealing();
+		if (tmp < 0) {
+			cls();
+			puts("");
+			exitRealTime();
+			fclose(flog);
+			SexitRealTime(); 
+			showCursor();
+			tmp==-1?
+			printf("\033[%dm%s\033[0m wins.\nCongratulations!\n", players[aliveP].col, players[aliveP].Name):
+			printf("\033[%dmNO BODY WINS.\033[0m\n", Red+Intense+Fore);
+//			cls();
+			return 0;
+		}
 		if (_kbhit()){
+//			_getch();
 			if(GetKeyState(VK_ESCAPE) & 0x8000){
 				cls();
 				puts("");
@@ -146,8 +190,7 @@ int mainGame::main(){
 				return 0;
 			}
 			for(int i = 0; i < playerCnt; i++){
-				if (players[i].movCnt) continue;
-				if (~ players[i].keyCatch.dealInput(' ', &players[i])) {
+				if (!players[i].keyCatch.dealInput(' ', &players[i])) {
 					players[i].movCnt = players[i].spd;
 					reflag |= 1;
 				}

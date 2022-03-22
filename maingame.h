@@ -20,9 +20,10 @@ const char defName[][8] = {
 class mainGame{
 	int playerCnt;
 	bool reflag;
+	int aliveP;
 	player players[5];
 	mapData *gameMap;
-	void realTimeDealing();
+	int realTimeDealing();
 	public:
 		mainGame();
 		mainGame(int fidx);

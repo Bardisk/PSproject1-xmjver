@@ -12,6 +12,9 @@
 #define MAXMSIZE 10000
 #define GAMETICK 25
 #define CURSOR_SPEED 10
+#define BOMB_TIME 120
+#define WAVE_TIME 10
+#define DEFAULT_SPEED 15
 
 //int a;
 class mapData;
@@ -24,7 +27,7 @@ struct cursor{
 	inline int dw(){return x<N-1?(x+=1):-1;}
 	inline int ri(){return y<M-1?(y+=1):-1;}
 	void renew(mapData *map);
-	inline int calNum(){return x*M+y;}
+	inline int calNum()const{return x*M+y;}
 };
 
 
@@ -61,7 +64,7 @@ struct player{
 		else strcpy(Name, PName);
 		pos = Ppos;
 		movCnt = 0;
-		spd = 10;
+		spd = DEFAULT_SPEED;
 		hp = 3;
 		lvl = 1;
 		sco = 0;
@@ -71,12 +74,14 @@ struct player{
 	}
 	char* getDesc(char *Desc, int idx=0);
 	char getHit(char s);
+	//funcs that interacts with map.
 	bool isBanMove(char ch);
 	int up();
 	int le();
 	int dw();
 	int ri();
 	int setBomb();
+	int eatItem();
 };
 
 //this makes a template string for filename 
@@ -97,7 +102,7 @@ const char RAWSNAME[] = "savs/sav .dat";
 #define enterRealTime() lastLoadedTime = lastRespondTime = clock(), tickCntSinceLoaded = 1, isRealTimeMode = true
 #define cls() printf("\033[H\033[2J\033[3J")
 #define SenterRealTime() printf("\033[?1049h"),cls(),setvbuf(stdout,buff,_IOFBF,4096)
-#define SexitRealTime() printf("\033[?1049l"),fflush(stdout),setvbuf(stdout,buff,_IONBF,4096);
+#define SexitRealTime() setvbuf(stdout,buff,_IONBF,4096),printf("\033[?1049l");
 
 //type accounts for lower 16 bits.
 //for bomb higher 8 bits for last-time, lower 8 bits for level.

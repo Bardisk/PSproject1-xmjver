@@ -301,6 +301,17 @@ bool player::isBanMove(char ch){
 		if (banMove[i] == ch) return true;
 	return false;
 }
+int player::eatItem(){
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (tmp.s2 == 'S')
+		spd -= tmp.info.value;
+	if (tmp.s2 == 'L')
+		lvl += tmp.info.value;
+	//erase the item
+	myMap->mapbuf[pos.calNum()].type ^= HAS_ITEM;
+	myMap->mapbuf[pos.calNum()].type &= 65535;
+	return 0;
+}
 int player::up(){
 	if (pos.up() == -1) return -1;
 	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
@@ -308,6 +319,7 @@ int player::up(){
 		pos.dw();
 		return -1;
 	}
+	if (tmp.s2 != 'N') eatItem();
 	return 0;
 }
 int player::le(){
@@ -317,6 +329,7 @@ int player::le(){
 		pos.ri();
 		return -1;
 	}
+	if (tmp.s2 != 'N') eatItem();
 	return 0;
 }
 int player::dw(){
@@ -326,6 +339,7 @@ int player::dw(){
 		pos.up();
 		return -1;
 	}
+	if (tmp.s2 != 'N') eatItem();
 	return 0;
 }
 int player::ri(){
@@ -335,11 +349,66 @@ int player::ri(){
 		pos.le();
 		return -1;
 	}
+	if (tmp.s2 != 'N') eatItem();
 	return 0;
 }
 int player::setBomb(){
+	myMap->mapbuf[pos.calNum()].type = 0;
 	myMap->mapbuf[pos.calNum()].type |= BOMB;
 	myMap->mapbuf[pos.calNum()].type |= (lvl << 16);
-	myMap->mapbuf[pos.calNum()].type |= (120 << 24);
+	myMap->mapbuf[pos.calNum()].type |= (BOMB_TIME << 24);
+	return 0;
+}
+
+int mapData::repWave(const cursor &tmpCur){
+	if (mapbuf[tmpCur.calNum()].type & HARD_WALL) return -1;
+	//if floor, clear the item and set the type to wave
+	if (mapbuf[tmpCur.calNum()].type & FLOOR_BLOCK) {
+		mapbuf[tmpCur.calNum()].type = WAVE | (WAVE_TIME << 24);
+		return 0;
+	}
+	if (mapbuf[tmpCur.calNum()].type & WAVE) {
+		mapbuf[tmpCur.calNum()].type = WAVE | (WAVE_TIME << 24);
+		return 0;
+	}
+	if (mapbuf[tmpCur.calNum()].type & BOMB) return 0;
+	//if soft wall, expose the item or generate an item randomly
+	if (mapbuf[tmpCur.calNum()].type & SOFT_WALL) {
+		mapbuf[tmpCur.calNum()].type ^= SOFT_WALL;
+		mapbuf[tmpCur.calNum()].type |= WAVE | (WAVE_TIME << 24);
+		if (!(mapbuf[tmpCur.calNum()].type & HAS_ITEM)) {
+			int rnd = rand() % 5;
+			if (!rnd) {
+				//to - do
+			}
+		}
+		return -1;
+	}
+	return 1;
+}
+
+int mapData::triggerBomb(const cursor &cur){
+	nodeInfo tmp = mapbuf[cur.calNum()].getInfo();
+	cursor tmpCur = cur;
+	mapbuf[cur.calNum()].type = WAVE | (WAVE_TIME << 24);
+	for (int i = 0; i < tmp.info.bvalue.level; i++) {
+		if (!~tmpCur.le()) break;
+		if (!~repWave(tmpCur)) break;
+	}
+	tmpCur = cur;
+	for (int i = 0; i < tmp.info.bvalue.level; i++) {
+		if (!~tmpCur.ri()) break;
+		if (!~repWave(tmpCur)) break;
+	}
+	tmpCur = cur;
+	for (int i = 0; i < tmp.info.bvalue.level; i++) {
+		if (!~tmpCur.up()) break;
+		if (!~repWave(tmpCur)) break;
+	}
+	tmpCur = cur;
+	for (int i = 0; i < tmp.info.bvalue.level; i++) {
+		if (!~tmpCur.dw()) break;
+		if (!~repWave(tmpCur)) break;
+	}
 	return 0;
 }

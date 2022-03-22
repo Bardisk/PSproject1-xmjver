@@ -70,6 +70,7 @@ int main(int argc, char **argv){
 			mainMap.save(idx);
 			continue;
 		}
+		
 		if (strCommand == "map-edit") {
 			mapEditor editor(&mainMap);
 			editor.main();

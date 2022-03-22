@@ -16,6 +16,8 @@ class mapData{
 		int draw(drawSettings dss=drawSettings());
 		int revs();
 		int check();
+		int triggerBomb(const cursor &cur);
+		int repWave(const cursor &tmpCur);
 		mapData(int fidx);
 };
 

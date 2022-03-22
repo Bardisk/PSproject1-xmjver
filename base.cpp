@@ -14,6 +14,9 @@ void setcol(int col){
 int keyCatcher::dealInput(int input, player *target){
 	//arrow keys can be only owned by one!
 //	bool flag=false;
+	if (GetKeyState(setter) & 0x8000)
+		return target->setBomb(),1;
+	if (target->movCnt) return -1;
 	if (GetKeyState(up) & 0x8000)
 		return target->up();
 	if (GetKeyState(dn) & 0x8000)
@@ -22,8 +25,6 @@ int keyCatcher::dealInput(int input, player *target){
 		return target->ri();
 	if (GetKeyState(le) & 0x8000)
 		return target->le();
-	if (GetKeyState(setter) & 0x8000)
-		return target->setBomb();
 	return -1;
 }
 
@@ -55,12 +56,12 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 	}
 	if (type & WAVE) {
 		s1 = 'W';
-		if (s2 != 'N')
-			type = B_AND_I_ERROR;
-		else {
-			info.bvalue.level = 0;
+//		if (s2 != 'N')
+//			type = B_AND_I_ERROR;
+//		else {
+			info.bvalue.level = (typ >> 16) & 255;
 			info.bvalue.lastTime = typ >> 24;
-		}
+//		}
 	}
 }
 
@@ -138,6 +139,9 @@ nodeInfo node::getDesc(char *Desc){
 			break;
 		case 'B':
 			fsprintf(Desc, "type: B(BOMB) with level:%-2d and last_time:%-2d\n", now.info.bvalue.level, now.info.bvalue.lastTime);
+			break;
+		case 'W':
+			fsprintf(Desc, "type: W(WAVE) with level:%-2d and last_time:%-2d\n", now.info.bvalue.level, now.info.bvalue.lastTime);
 			break;
 		default:
 			fsprintf(Desc, "type: U(UNDEFINED)                          \n");
