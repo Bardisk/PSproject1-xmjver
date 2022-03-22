@@ -11,6 +11,21 @@ void setcol(int col){
 	return ;
 }
 
+int keyCatcher::dealInput(int input, player *target){
+	//arrow keys can be only owned by one!
+//	bool flag=false;
+	if (GetKeyState(up) & 0x8000)
+		return target->up();
+	if (GetKeyState(dn) & 0x8000)
+		return target->dw();
+	if (GetKeyState(ri) & 0x8000)
+		return target->ri();
+	if (GetKeyState(le) & 0x8000)
+		return target->le();
+	if (GetKeyState(setter) & 0x8000)
+		return target->setBomb();
+	return -1;
+}
 
 nodeInfo::nodeInfo(const unsigned int &typ){
 	type = typ & 65535;
@@ -143,7 +158,7 @@ nodeInfo node::getDesc(char *Desc){
 }
 
 char* player::getDesc(char *Desc, int idx){
-	sprintf(Desc, "%s: hp:%d level:%d speed:%d score:%d\n", Name, hp, lvl, sco, spd);
+	sprintf(Desc, "\033[%d;4m%s\033[0m: hp:%d level:%d speed:%d score:%d\n", col, Name, hp, lvl, spd, sco);
 	return Desc;
 }
 

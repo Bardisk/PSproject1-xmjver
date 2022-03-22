@@ -27,27 +27,56 @@ struct cursor{
 	inline int calNum(){return x*M+y;}
 };
 
-struct keycatcher{
-	
+
+#define NUMUP 0xe048
+#define NUMDW 0xe050
+#define NUMRI 0xe04D
+#define NUMLE 0xe04B
+
+struct player;
+//typedef unsigned short uint16;
+struct keyCatcher{
+	int up, dn, ri, le;
+	int setter;
+	keyCatcher(int _up='W', int _dn='S', int _ri='D', int _le='A', int _setter=' '){
+		this->up = _up; this->dn = _dn;
+		this->ri = _ri; this->le = _le;
+		this->setter = _setter;
+	}
+	int dealInput(int input, player *target);
 };
+
+const char banMove[] = "SHB";
 
 struct player{
 	cursor pos;
 	int spd, hp, lvl, sco;
+	int movCnt;
 	char Name[15], Rpcr;
-	int col; 
-	player(const char *PName = NULL, char PRpcr = '$', int col = 0, cursor Ppos = cursor()): Rpcr(PRpcr){
+	keyCatcher keyCatch;
+	mapData *myMap;
+	int col;
+	player(const char *PName = NULL, char PRpcr = '$', int col = 0, cursor Ppos = cursor(), const keyCatcher &PkeyCatch = keyCatcher(), mapData *PmyMap = NULL): Rpcr(PRpcr){
 		if (!PName) sprintf(Name, "Default Name");
 		else strcpy(Name, PName);
 		pos = Ppos;
+		movCnt = 0;
 		spd = 10;
 		hp = 3;
 		lvl = 1;
 		sco = 0;
+		keyCatch = PkeyCatch;
+		myMap = PmyMap;
 		this->col = col;
 	}
 	char* getDesc(char *Desc, int idx=0);
 	char getHit(char s);
+	bool isBanMove(char ch);
+	int up();
+	int le();
+	int dw();
+	int ri();
+	int setBomb();
 };
 
 //this makes a template string for filename 

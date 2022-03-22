@@ -8,8 +8,9 @@ extern bool isRealTimeMode;
 mainGame::mainGame(){
 	gameMap = NULL;
 	playerCnt = 2;
-	players[0] = player(defName[0], '$', playerCol[0], cursor(1,1));
-	players[1] = player(defName[1], '$', playerCol[1], cursor(13,15));
+	keyCatcher p1('W','S','D','A',' '),p2(VK_UP,VK_DOWN,VK_RIGHT,VK_LEFT,VK_OEM_2);
+	players[0] = player(defName[0], '$', playerCol[0], cursor(1,1), p1);
+	players[1] = player(defName[1], '$', playerCol[1], cursor(13,15), p2);
 }
 
 int mainGame::loadMap(mapData *targetMap){
@@ -18,8 +19,10 @@ int mainGame::loadMap(mapData *targetMap){
 		return -1;
 	}
 	gameMap = targetMap;
-	for (int i = 0; i < playerCnt; i++)
+	for (int i = 0; i < playerCnt; i++) {
 		players[i].pos.renew(targetMap);
+		players[i].myMap = targetMap;
+	}
 	return 0;
 }
 mainGame::mainGame(int fidx){
@@ -47,6 +50,11 @@ int mainGame::load(int fidx){
 	playerCnt = 0;
 	fread(&playerCnt, sizeof (int), 1, fp);
 	fread(players, sizeof (player), playerCnt, fp);
+	printw("Loading Map for players...\n");
+	if(!~loadMap(gameMap)){
+		putr("ERROR: MAP IS INVAILD!");
+		return -1;
+	}
 	printw("Everything Done!\n");
 	fclose(fp);
 	return 0;
@@ -94,6 +102,21 @@ void mainGame::refresh(){
 	return ;
 }
 
+void mainGame::realTimeDealing(){
+	for (int i = 0; i < playerCnt; i++)
+		if (players[i].movCnt) --players[i].movCnt;
+	for (int i = 0; i < gameMap->szN * gameMap->szM; i++) {
+		if (gameMap->mapbuf[i].type & BOMB) {
+			gameMap->mapbuf[i].type -= (1 << 24);
+			if (!(gameMap->mapbuf[i].type >> 24)){
+				gameMap->mapbuf[i].type ^= BOMB;
+				//to-do
+				reflag = true;
+			}
+		}
+	}
+	return ;
+}
 
 int mainGame::main(){
 	FILE *flog = fopen("realtimelog.txt", "w");
@@ -103,7 +126,6 @@ int mainGame::main(){
 	SenterRealTime();
 	hideCursor();
 	enterRealTime();
-	bool reflag = false;
 	refresh();
 	while (true) {
 		clock_t nowt = clock();
@@ -112,24 +134,27 @@ int mainGame::main(){
 		++tickCntSinceLoaded;
 		fprintf(flog, "tick: %d, timegap: %ld\n", tickCntSinceLoaded, nowt - lastRespondTime);
 		lastRespondTime = nowt;
-
+		realTimeDealing();
 		if (_kbhit()){
-			char ch = _getch();
-			switch (ch) {
-				case 0x1b: //esc
-					cls();
-					puts("Exit from edit mode.");
-					exitRealTime();
-					fclose(flog);
-					SexitRealTime(); 
-					showCursor();
-					return 0;
-				case '\r':
-					break;
-				default:
+			if(GetKeyState(VK_ESCAPE) & 0x8000){
+				cls();
+				puts("");
+				exitRealTime();
+				fclose(flog);
+				SexitRealTime(); 
+				showCursor();
+				return 0;
+			}
+			for(int i = 0; i < playerCnt; i++){
+				if (players[i].movCnt) continue;
+				if (~ players[i].keyCatch.dealInput(' ', &players[i])) {
+					players[i].movCnt = players[i].spd;
 					reflag |= 1;
+				}
 			}
 		}
+		reflag ? (refresh()) : (void) 0;
+		reflag = false;
 //		reflag ? (reflag=refresh(bsflag)) : 0;
 	}
 	fclose(flog);

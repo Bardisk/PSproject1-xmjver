@@ -296,3 +296,50 @@ int mapEditor::main(){
 	return 0;
 }
 
+bool player::isBanMove(char ch){
+	for (int i = 0; i < strlen(banMove); i++)
+		if (banMove[i] == ch) return true;
+	return false;
+}
+int player::up(){
+	if (pos.up() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.dw();
+		return -1;
+	}
+	return 0;
+}
+int player::le(){
+	if (pos.le() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.ri();
+		return -1;
+	}
+	return 0;
+}
+int player::dw(){
+	if (pos.dw() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.up();
+		return -1;
+	}
+	return 0;
+}
+int player::ri(){
+	if (pos.ri() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.le();
+		return -1;
+	}
+	return 0;
+}
+int player::setBomb(){
+	myMap->mapbuf[pos.calNum()].type |= BOMB;
+	myMap->mapbuf[pos.calNum()].type |= (lvl << 16);
+	myMap->mapbuf[pos.calNum()].type |= (120 << 24);
+	return 0;
+}

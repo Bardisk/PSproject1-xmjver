@@ -19,15 +19,16 @@ const char defName[][8] = {
 
 class mainGame{
 	int playerCnt;
+	bool reflag;
 	player players[5];
 	mapData *gameMap;
+	void realTimeDealing();
 	public:
 		mainGame();
 		mainGame(int fidx);
 		int loadMap(mapData *targetMap);
 		void display();
 		void refresh();
-//		void regPlayer();
 		int load(int fidx=0);
 		int save(int fidx=0);
 		int main();
