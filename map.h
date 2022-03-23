@@ -1,6 +1,9 @@
 #ifndef _MAP_H_
 #define _MAP_H_
 #include "base.h"
+struct node;
+struct cursor;
+struct drawSettings;
 class mapData{
 	//data members
 	public:
@@ -8,7 +11,6 @@ class mapData{
 		node mapbuf[MAXMSIZE];
 	
 		//public methods
-	
 		mapData() : szN(0), szM(0) {};
 		mapData(int N, int M) : szN(N), szM(M) {};
 		int load(int fidx=0);

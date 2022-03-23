@@ -1,4 +1,6 @@
 #include "maingame.h"
+#include "ai.h"
+#include <iostream>
 
 extern char buff[4096];
 extern int tickCntSinceLoaded;
@@ -7,10 +9,16 @@ extern bool isRealTimeMode;
 
 mainGame::mainGame(){
 	gameMap = NULL;
-	playerCnt = 2;
-	keyCatcher p1('W','S','D','A',' '),p2(VK_UP,VK_DOWN,VK_RIGHT,VK_LEFT,VK_OEM_2);
+	playerCnt = 4;
+	keyCatcher p1('W','S','D','A',' '), p2(VK_UP,VK_DOWN,VK_RIGHT,VK_LEFT,VK_OEM_2);
 	players[0] = player(defName[0], '$', playerCol[0], cursor(1,1), p1);
 	players[1] = player(defName[1], '$', playerCol[1], cursor(13,15), p2);
+	players[2] = player(defName[2], '&', playerCol[2], cursor(1,15));
+	players[2].isAI = true;
+	players[2].robot = new AI();
+	players[3] = player(defName[3], '&', playerCol[3], cursor(13,1));
+	players[3].isAI = true;
+	players[3].robot = new AI();
 }
 
 int mainGame::loadMap(mapData *targetMap){
@@ -166,6 +174,7 @@ int mainGame::main(){
 		lastRespondTime = nowt;
 		int tmp = realTimeDealing();
 		if (tmp < 0) {
+//			goto bg;
 			cls();
 			puts("");
 			exitRealTime();
@@ -175,25 +184,25 @@ int mainGame::main(){
 			tmp==-1?
 			printf("\033[%dm%s\033[0m wins.\nCongratulations!\n", players[aliveP].col, players[aliveP].Name):
 			printf("\033[%dmNO BODY WINS.\033[0m\n", Red+Intense+Fore);
-//			cls();
+			printw("PRESS ESC TO EXIT...\n");
+			while(1) if(GetKeyState(VK_ESCAPE) & 0x8000) break;
 			return 0;
 		}
-		if (_kbhit()){
 //			_getch();
-			if(GetKeyState(VK_ESCAPE) & 0x8000){
-				cls();
-				puts("");
-				exitRealTime();
-				fclose(flog);
-				SexitRealTime(); 
-				showCursor();
-				return 0;
-			}
-			for(int i = 0; i < playerCnt; i++){
-				if (!players[i].keyCatch.dealInput(' ', &players[i])) {
-					players[i].movCnt = players[i].spd;
-					reflag |= 1;
-				}
+		if(GetKeyState(VK_ESCAPE) & 0x8000){
+			cls();
+			puts("");
+			exitRealTime();
+			fclose(flog);
+			SexitRealTime(); 
+//				fflush(stdin);
+			showCursor();
+			return 0;
+		}
+		for(int i = 0; i < playerCnt; i++){
+			if (!players[i].keyCatch.dealInput(' ', &players[i])) {
+				players[i].movCnt = players[i].spd;
+				reflag |= 1;
 			}
 		}
 		reflag ? (refresh()) : (void) 0;

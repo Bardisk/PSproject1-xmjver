@@ -7,7 +7,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <conio.h>
-#include "color.h" 
+#include "color.h"
+
+//some basic constants
 
 #define MAXMSIZE 10000
 #define GAMETICK 25
@@ -18,6 +20,9 @@
 
 //int a;
 class mapData;
+class AI;
+
+//
 struct cursor{
 	int x, y;
 	int N, M;
@@ -47,6 +52,7 @@ struct keyCatcher{
 		this->setter = _setter;
 	}
 	int dealInput(int input, player *target);
+	int dealAI(player *target);
 };
 
 const char banMove[] = "SHB";
@@ -58,6 +64,8 @@ struct player{
 	char Name[15], Rpcr;
 	keyCatcher keyCatch;
 	mapData *myMap;
+	bool isAI;
+	AI *robot;
 	int col;
 	player(const char *PName = NULL, char PRpcr = '$', int col = 0, cursor Ppos = cursor(), const keyCatcher &PkeyCatch = keyCatcher(), mapData *PmyMap = NULL): Rpcr(PRpcr){
 		if (!PName) sprintf(Name, "Default Name");
@@ -70,6 +78,8 @@ struct player{
 		sco = 0;
 		keyCatch = PkeyCatch;
 		myMap = PmyMap;
+		isAI = false;
+		robot = NULL;
 		this->col = col;
 	}
 	char* getDesc(char *Desc, int idx=0);

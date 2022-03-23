@@ -6,7 +6,9 @@
 const int playerCol[] = {
 	Fore + Purple + Intense,
 	Fore + Green + Intense,
-	0, 0, 0
+	Fore + Blue + Intense,
+	Fore + White + Intense,
+	0
 };
 const char defName[][8] = {
 	"Player0",

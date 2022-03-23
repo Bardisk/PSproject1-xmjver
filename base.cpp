@@ -1,4 +1,6 @@
 #include "base.h"
+#include "ai.h"
+#include "map.h" 
 
 #define B_AND_I_ERROR 0xfffb
 
@@ -12,10 +14,11 @@ void setcol(int col){
 }
 
 int keyCatcher::dealInput(int input, player *target){
+	if(target->isAI) return dealAI(target);
 	//arrow keys can be only owned by one!
 //	bool flag=false;
 	if (GetKeyState(setter) & 0x8000)
-		return target->setBomb(),1;
+		return target->setBomb(), 1;
 	if (target->movCnt) return -1;
 	if (GetKeyState(up) & 0x8000)
 		return target->up();
@@ -25,6 +28,26 @@ int keyCatcher::dealInput(int input, player *target){
 		return target->ri();
 	if (GetKeyState(le) & 0x8000)
 		return target->le();
+	return -1;
+}
+
+int keyCatcher::dealAI(player *target){
+	int tmpDec = target->robot->decision(target);
+	if (tmpDec == DECIDE_SETBOMB)
+		return target->robot->success(target->setBomb()), 1;
+	if (!tmpDec || target->movCnt) return -1;
+	switch (tmpDec) {
+		case DECIDE_UP:
+			return target->robot->success(target->up());
+		case DECIDE_DOWN:
+			return target->robot->success(target->dw());
+		case DECIDE_LEFT:
+			return target->robot->success(target->le());
+		case DECIDE_RIGHT:
+			return target->robot->success(target->ri());
+		default:
+			return -1;
+	}
 	return -1;
 }
 
@@ -183,4 +206,69 @@ int drawSettings::calHit(int pos){
 			ans |= HIT_CURSOR;
 	}
 	return ans;
+}
+
+bool player::isBanMove(char ch){
+	for (int i = 0; i < strlen(banMove); i++)
+		if (banMove[i] == ch) return true;
+	return false;
+}
+
+int player::eatItem(){
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (tmp.s2 == 'S')
+		spd -= tmp.info.value;
+	if (tmp.s2 == 'L')
+		lvl += tmp.info.value;
+	//erase the item
+	myMap->mapbuf[pos.calNum()].type ^= HAS_ITEM;
+	myMap->mapbuf[pos.calNum()].type &= 65535;
+	return 0;
+}
+int player::up(){
+	if (pos.up() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.dw();
+		return -1;
+	}
+	if (tmp.s2 != 'N') eatItem();
+	return 0;
+}
+int player::le(){
+	if (pos.le() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.ri();
+		return -1;
+	}
+	if (tmp.s2 != 'N') eatItem();
+	return 0;
+}
+int player::dw(){
+	if (pos.dw() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.up();
+		return -1;
+	}
+	if (tmp.s2 != 'N') eatItem();
+	return 0;
+}
+int player::ri(){
+	if (pos.ri() == -1) return -1;
+	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
+	if (isBanMove(tmp.s1)) {
+		pos.le();
+		return -1;
+	}
+	if (tmp.s2 != 'N') eatItem();
+	return 0;
+}
+int player::setBomb(){
+	myMap->mapbuf[pos.calNum()].type = 0;
+	myMap->mapbuf[pos.calNum()].type |= BOMB;
+	myMap->mapbuf[pos.calNum()].type |= (lvl << 16);
+	myMap->mapbuf[pos.calNum()].type |= (BOMB_TIME << 24);
+	return 0;
 }
