@@ -53,8 +53,27 @@ int main(int argc, char **argv){
 			continue;
 		}
 		if (strCommand == "help-debug") {
-			puts("Not established yet.");
+			putr("Warning:\nThese advanced options are intended for developers for the present.\nTheir usage may cause unexpected bugs or exceptions for the main game.");
+			FILE* fp = fopen("etcs/helpadvanced.txt","r");
+			if (!fp) {
+				puts("Help txt not found!");
+				continue;
+			}
+			else {
+				char buf[2001];
+				while(fgets(buf, 2000, fp)) printf(buf);
+				puts("");
+			}
+			fclose(fp);
 			continue;
+		}
+		if (strCommand == "reset") {
+			mainMap.load(0);
+			game = mainGame();
+			continue;
+		}
+		if (strCommand == "quit") {
+			return 0;
 		}
 		if (strCommand == "load-map") {
 			printf("Index? ");
@@ -99,6 +118,9 @@ int main(int argc, char **argv){
 		if (strCommand == "game") {
 			game.loadMap(&mainMap);
 			game.main();
+			puts("Welcome into the Game PaoPaoTang(PPT)!");
+			puts("Author: Litrehinn");
+			puts("This is the command line for lanuching or debuging.");
 			continue;
 		}
 		puts("Sorry, we haven't such command, try using 'help'.");

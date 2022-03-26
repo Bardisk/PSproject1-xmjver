@@ -15,8 +15,16 @@
 #define GAMETICK 25
 #define CURSOR_SPEED 10
 #define BOMB_TIME 120
-#define WAVE_TIME 10
+#define WAVE_TIME 25
 #define DEFAULT_SPEED 15
+#define ITEM_SCORE 20
+#define SCO_PER_SEC 1
+#define WALL_SCORE 10
+#define SCO_PER_HP 50
+#define INITIAL_HP 3
+#define SPEED_LOWERBOUND 7
+#define LEVEL_UPPERBOUND 5
+#define DEFAULT_LEVEL 1
 
 //int a;
 class mapData;
@@ -59,28 +67,37 @@ const char banMove[] = "SHB";
 
 struct player{
 	cursor pos;
-	int spd, hp, lvl, sco;
+	int spd, hp, lvl, sco, bmbOwning, id;
 	int movCnt;
 	char Name[15], Rpcr;
 	keyCatcher keyCatch;
 	mapData *myMap;
 	bool isAI;
+	bool isMirror;
 	AI *robot;
 	int col;
-	player(const char *PName = NULL, char PRpcr = '$', int col = 0, cursor Ppos = cursor(), const keyCatcher &PkeyCatch = keyCatcher(), mapData *PmyMap = NULL): Rpcr(PRpcr){
+	player(const char *PName = NULL, char PRpcr = '$', int col = 0, cursor Ppos = cursor(), const keyCatcher &PkeyCatch = keyCatcher(), mapData *PmyMap = NULL, int myid = 0): Rpcr(PRpcr){
 		if (!PName) sprintf(Name, "Default Name");
 		else strcpy(Name, PName);
 		pos = Ppos;
 		movCnt = 0;
+		isMirror = false;
 		spd = DEFAULT_SPEED;
-		hp = 3;
-		lvl = 1;
+		hp = INITIAL_HP;
+		lvl = DEFAULT_LEVEL;
 		sco = 0;
+		id = myid;
+		bmbOwning = 1;
 		keyCatch = PkeyCatch;
 		myMap = PmyMap;
 		isAI = false;
 		robot = NULL;
 		this->col = col;
+	}
+	//mirror player can't modify the map
+	player(const player& mirror){
+		*this = mirror;
+		isMirror = true;
 	}
 	char* getDesc(char *Desc, int idx=0);
 	char getHit(char s);
@@ -114,17 +131,20 @@ const char RAWSNAME[] = "savs/sav .dat";
 #define SenterRealTime() printf("\033[?1049h"),cls(),setvbuf(stdout,buff,_IOFBF,4096)
 #define SexitRealTime() setvbuf(stdout,buff,_IONBF,4096),printf("\033[?1049l");
 
-//type accounts for lower 16 bits.
-//for bomb higher 8 bits for last-time, lower 8 bits for level.
-//for others higher 16 bits accounts for value.
+// 0~7th bit terra_type
+// 8~14th bit item_type
+// 15th bit error_sign
+// 16~19th bit general_value
+// 20~23th bit owner (for B&W)
+// 24~31th bit last_time (for B&W)
 #define FLOOR_BLOCK 0x0001
 #define HARD_WALL 0x0002
 #define SOFT_WALL 0x0004
 #define BOMB 0x0008
-#define HAS_ITEM 0x0010
-#define SPEED_UP 0x0020
-#define LEVEL_UP 0x0040
-#define WAVE 0x0080
+#define HAS_ITEM 0x4000
+#define SPEED_UP 0x2000
+#define LEVEL_UP 0x1000
+#define WAVE 0x0010
 
 struct nodeInfo{
 	short type;
@@ -133,7 +153,8 @@ struct nodeInfo{
 		//used for bomb 
 		struct{
 			short lastTime;
-			short level;
+			char level;
+			char owner;
 		}bvalue;
 		int value;
 	}info;
@@ -157,6 +178,8 @@ struct node{
 	unsigned int type;
 	node(const unsigned int &t=0) : type(t) {};
 	inline nodeInfo getInfo(){return nodeInfo(type);};
+	inline void clearBWInfo(){type &= 1048575;}
+	inline void clearItem(){type &= 255;}
 	nodeInfo getDesc(char *Desc);
 	int changeNode();
 };

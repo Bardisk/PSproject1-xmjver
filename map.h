@@ -18,8 +18,8 @@ class mapData{
 		int draw(drawSettings dss=drawSettings());
 		int revs();
 		int check();
-		int triggerBomb(const cursor &cur);
-		int repWave(const cursor &tmpCur);
+		int triggerBomb(const cursor &cur, player *owner);
+		int repWave(const cursor &tmpCur, int waveTemp, player *owner);
 		mapData(int fidx);
 };
 

@@ -33,8 +33,10 @@ int keyCatcher::dealInput(int input, player *target){
 
 int keyCatcher::dealAI(player *target){
 	int tmpDec = target->robot->decision(target);
-	if (tmpDec == DECIDE_SETBOMB)
+	if (tmpDec == DECIDE_SETBOMB){
+		if (!target->bmbOwning) return -1;
 		return target->robot->success(target->setBomb()), 1;
+	}
 	if (!tmpDec || target->movCnt) return -1;
 	switch (tmpDec) {
 		case DECIDE_UP:
@@ -70,19 +72,21 @@ nodeInfo::nodeInfo(const unsigned int &typ){
 		s1 = 'F';
 	if (type & BOMB) {
 		s1 = 'B';
-		if (s2 != 'N')
-			type = B_AND_I_ERROR;
-		else {
-			info.bvalue.level = (typ >> 16) & 255;
+//		if (s2 != 'N')
+//			type = B_AND_I_ERROR;
+//		else {
+			info.bvalue.level = (typ >> 16) & 15;
+			info.bvalue.owner = (typ >> 20) & 15;
 			info.bvalue.lastTime = typ >> 24;
-		}
+//		}
 	}
 	if (type & WAVE) {
 		s1 = 'W';
 //		if (s2 != 'N')
 //			type = B_AND_I_ERROR;
 //		else {
-			info.bvalue.level = (typ >> 16) & 255;
+			info.bvalue.level = (typ >> 16) & 15;
+			info.bvalue.owner = (typ >> 20) & 15;
 			info.bvalue.lastTime = typ >> 24;
 //		}
 	}
@@ -185,7 +189,7 @@ nodeInfo node::getDesc(char *Desc){
 }
 
 char* player::getDesc(char *Desc, int idx){
-	sprintf(Desc, "\033[%d;4m%s\033[0m: hp:%d level:%d speed:%d score:%d\n", col, Name, hp, lvl, spd, sco);
+	sprintf(Desc, "\033[%d;4m%s\033[0m: bomb_level:%d speed_level:%d score:%d\n", col, Name, lvl, (15-spd)/2, sco);
 	return Desc;
 }
 
@@ -215,14 +219,22 @@ bool player::isBanMove(char ch){
 }
 
 int player::eatItem(){
+	if(isMirror) return -1;
 	nodeInfo tmp = myMap->mapbuf[pos.calNum()].getInfo();
-	if (tmp.s2 == 'S')
-		spd -= tmp.info.value;
-	if (tmp.s2 == 'L')
-		lvl += tmp.info.value;
+	if (tmp.s2 == 'S'){
+		if (spd - tmp.info.value >= SPEED_LOWERBOUND)
+			spd -= tmp.info.value;
+		sco += ITEM_SCORE;
+	}
+		
+	if (tmp.s2 == 'L'){
+		if (lvl + tmp.info.value <= LEVEL_UPPERBOUND)
+			lvl += tmp.info.value;
+		sco += ITEM_SCORE;
+	}
+		
 	//erase the item
-	myMap->mapbuf[pos.calNum()].type ^= HAS_ITEM;
-	myMap->mapbuf[pos.calNum()].type &= 65535;
+	myMap->mapbuf[pos.calNum()].clearItem();
 	return 0;
 }
 int player::up(){
@@ -262,13 +274,18 @@ int player::ri(){
 		pos.le();
 		return -1;
 	}
-	if (tmp.s2 != 'N') eatItem();
+	if (tmp.s2 != 'N')
+		eatItem();
 	return 0;
 }
 int player::setBomb(){
+	if (isMirror) return -1;
+	if (!bmbOwning) return -1;
+	--bmbOwning;
 	myMap->mapbuf[pos.calNum()].type = 0;
 	myMap->mapbuf[pos.calNum()].type |= BOMB;
 	myMap->mapbuf[pos.calNum()].type |= (lvl << 16);
+	myMap->mapbuf[pos.calNum()].type |= (id << 20);
 	myMap->mapbuf[pos.calNum()].type |= (BOMB_TIME << 24);
 	return 0;
 }

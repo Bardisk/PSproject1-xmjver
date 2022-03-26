@@ -6,7 +6,7 @@ Ver=2
 ObjFiles=
 Includes=
 Libs=
-PrivateResource=
+PrivateResource=PaoPaoTang_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=
@@ -25,29 +25,29 @@ UseCustomMakefile=0
 CustomMakefile=
 CommandLine=
 Folders=Headers,Srcs
-IncludeVersionInfo=0
+IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=1
 CompilerSettings=0000000000000000001000000
 UnitCount=11
 
 [VersionInfo]
-Major=1
-Minor=0
-Release=0
-Build=0
+Major=0
+Minor=1
+Release=1
+Build=2
 LanguageID=1033
 CharsetID=1252
 CompanyName=
-FileVersion=1.0.0.0
+FileVersion=0.1.1.2
 FileDescription=Developed using the Dev-C++ IDE
 InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=
 ProductName=
-ProductVersion=1.0.0.0
-AutoIncBuildNr=0
+ProductVersion=0.1.1.2
+AutoIncBuildNr=1
 SyncProduct=1
 
 [Unit1]

@@ -4,6 +4,7 @@
 int AI::decision(player *me)
 {
 	player tmpMe = *me;
+//	tmpMe.isMirror = true;
 	if (me->hp <= 0) return 0;
 	if (step == 0) {
 		if (~tmpMe.le())

@@ -296,26 +296,37 @@ int mapEditor::main(){
 	return 0;
 }
 
-int mapData::repWave(const cursor &tmpCur){
+//replace a node by WAVE
+int mapData::repWave(const cursor &tmpCur, const int waveTemp, player *owner){
 	if (mapbuf[tmpCur.calNum()].type & HARD_WALL) return -1;
 	//if floor, clear the item and set the type to wave
 	if (mapbuf[tmpCur.calNum()].type & FLOOR_BLOCK) {
-		mapbuf[tmpCur.calNum()].type = WAVE | (WAVE_TIME << 24);
+		mapbuf[tmpCur.calNum()].type = waveTemp;
 		return 0;
 	}
 	if (mapbuf[tmpCur.calNum()].type & WAVE) {
-		mapbuf[tmpCur.calNum()].type = WAVE | (WAVE_TIME << 24);
+		mapbuf[tmpCur.calNum()].type = waveTemp;
 		return 0;
 	}
 	if (mapbuf[tmpCur.calNum()].type & BOMB) return 0;
 	//if soft wall, expose the item or generate an item randomly
 	if (mapbuf[tmpCur.calNum()].type & SOFT_WALL) {
 		mapbuf[tmpCur.calNum()].type ^= SOFT_WALL;
-		mapbuf[tmpCur.calNum()].type |= WAVE | (WAVE_TIME << 24);
+		mapbuf[tmpCur.calNum()].type |= waveTemp;
 		if (!(mapbuf[tmpCur.calNum()].type & HAS_ITEM)) {
-			int rnd = rand() % 5;
+			owner->sco += WALL_SCORE;
+			int rnd = rand() % 15;
 			if (!rnd) {
-				//to - do
+				mapbuf[tmpCur.calNum()].type |= HAS_ITEM;
+				int rnd2 = rand() % 3;
+				if(!rnd2){
+					mapbuf[tmpCur.calNum()].type |= SPEED_UP;
+					mapbuf[tmpCur.calNum()].type |= (2 << 16);
+				}
+				else{
+					mapbuf[tmpCur.calNum()].type |= LEVEL_UP;
+					mapbuf[tmpCur.calNum()].type |= (1 << 16);
+				}
 			}
 		}
 		return -1;
@@ -323,28 +334,32 @@ int mapData::repWave(const cursor &tmpCur){
 	return 1;
 }
 
-int mapData::triggerBomb(const cursor &cur){
+//trigger a bomb in the map
+//return the id of the owner
+int mapData::triggerBomb(const cursor &cur, player* owner){
 	nodeInfo tmp = mapbuf[cur.calNum()].getInfo();
 	cursor tmpCur = cur;
-	mapbuf[cur.calNum()].type = WAVE | (WAVE_TIME << 24);
+	int waveTemplate = WAVE | (WAVE_TIME << 24) | (tmp.info.bvalue.owner << 20);
+	mapbuf[cur.calNum()].type = waveTemplate;
 	for (int i = 0; i < tmp.info.bvalue.level; i++) {
 		if (!~tmpCur.le()) break;
-		if (!~repWave(tmpCur)) break;
+		if (!~repWave(tmpCur, waveTemplate, owner)) break;
 	}
 	tmpCur = cur;
 	for (int i = 0; i < tmp.info.bvalue.level; i++) {
 		if (!~tmpCur.ri()) break;
-		if (!~repWave(tmpCur)) break;
+		if (!~repWave(tmpCur, waveTemplate, owner)) break;
 	}
 	tmpCur = cur;
 	for (int i = 0; i < tmp.info.bvalue.level; i++) {
 		if (!~tmpCur.up()) break;
-		if (!~repWave(tmpCur)) break;
+		if (!~repWave(tmpCur, waveTemplate, owner)) break;
 	}
 	tmpCur = cur;
 	for (int i = 0; i < tmp.info.bvalue.level; i++) {
 		if (!~tmpCur.dw()) break;
-		if (!~repWave(tmpCur)) break;
+		if (!~repWave(tmpCur, waveTemplate, owner)) break;
 	}
-	return 0;
+	owner->bmbOwning += 1;
+	return tmp.info.bvalue.owner;
 }

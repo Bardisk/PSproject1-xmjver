@@ -4,8 +4,9 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = map.o map_generator.o base.o main.o maingame.o ai.o
-LINKOBJ  = map.o map_generator.o base.o main.o maingame.o ai.o
+RES      = PaoPaoTang_private.res
+OBJ      = map.o map_generator.o base.o main.o maingame.o ai.o $(RES)
+LINKOBJ  = map.o map_generator.o base.o main.o maingame.o ai.o $(RES)
 LIBS     = -L"D:/Program Files/Dev-Cpp/MinGW64/lib" -L"D:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
 INCS     = -I"D:/Program Files/Dev-Cpp/MinGW64/include" -I"D:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"D:/Program Files/Dev-Cpp/MinGW64/include" -I"D:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
@@ -41,3 +42,7 @@ maingame.o: maingame.cpp
 
 ai.o: ai.cpp
 	$(CPP) -c ai.cpp -o ai.o $(CXXFLAGS)
+
+PaoPaoTang_private.res: PaoPaoTang_private.rc 
+	$(WINDRES) -i PaoPaoTang_private.rc --input-format=rc -o PaoPaoTang_private.res -O coff 
+
