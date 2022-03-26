@@ -1,0 +1,5 @@
+save - save the game (uncompleted)
+load - load the game (uncompleted)
+load-map - load map from certain file
+save-map - save map to certain file
+map-edit - enter the mapEditor command line
