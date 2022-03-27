@@ -6,6 +6,7 @@ COORD startUp={0,0};
 
 char buff[4096];
 bool isRealTimeMode = false;
+int generateFactor = DEFAULT_FACTOR;
 clock_t lastRespondTime, lastLoadedTime;
 int tickCntSinceLoaded = 0;
 
@@ -50,6 +51,13 @@ int main(int argc, char **argv){
 				puts("");
 			}
 			fclose(fp);
+			continue;
+		}
+		if (strCommand == "set-factor") {
+			printf("Value? ");
+			int v;
+			scanf("%d", &v);
+			generateFactor = v;
 			continue;
 		}
 		if (strCommand == "help-debug") {

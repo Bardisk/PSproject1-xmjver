@@ -2,12 +2,11 @@
 
 extern char buff[];
 extern HANDLE hOutput;
-extern CONSOLE_CURSOR_INFO cci;
-extern COORD startUp;
 
 extern bool isRealTimeMode;
 extern clock_t lastRespondTime, lastLoadedTime;
 extern int tickCntSinceLoaded; 
+extern int generateFactor;
 
 void cursor::renew(mapData *map) {N = map ->szN; M = map -> szM;}
 
@@ -315,7 +314,8 @@ int mapData::repWave(const cursor &tmpCur, const int waveTemp, player *owner){
 		mapbuf[tmpCur.calNum()].type |= waveTemp;
 		if (!(mapbuf[tmpCur.calNum()].type & HAS_ITEM)) {
 			owner->sco += WALL_SCORE;
-			int rnd = rand() % 15;
+			if(generateFactor <= 0) return -1;
+			int rnd = rand() % generateFactor;
 			if (!rnd) {
 				mapbuf[tmpCur.calNum()].type |= HAS_ITEM;
 				int rnd2 = rand() % 3;

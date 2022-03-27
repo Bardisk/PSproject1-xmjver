@@ -25,6 +25,7 @@
 #define SPEED_LOWERBOUND 7
 #define LEVEL_UPPERBOUND 5
 #define DEFAULT_LEVEL 1
+#define DEFAULT_FACTOR 15
 
 //int a;
 class mapData;

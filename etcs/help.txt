@@ -3,3 +3,6 @@ help-debug - show help with debug options
 game - start the main game
 reset - reset the game and map
 quit or EOF - exit the commandline
+game help:
+Player0 - W A S D + space
+Player1 - Up Left Down Right + /

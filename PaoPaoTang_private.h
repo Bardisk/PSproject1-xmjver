@@ -5,19 +5,19 @@
 #define PAOPAOTANG_PRIVATE_H
 
 /* VERSION DEFINITIONS */
-#define VER_STRING	"0.1.1.2"
+#define VER_STRING	"0.1.2.10"
 #define VER_MAJOR	0
 #define VER_MINOR	1
-#define VER_RELEASE	1
-#define VER_BUILD	2
+#define VER_RELEASE	2
+#define VER_BUILD	10
 #define COMPANY_NAME	""
-#define FILE_VERSION	"0.1.1.2"
+#define FILE_VERSION	"0.1.2.10"
 #define FILE_DESCRIPTION	"Developed using the Dev-C++ IDE"
 #define INTERNAL_NAME	""
 #define LEGAL_COPYRIGHT	""
 #define LEGAL_TRADEMARKS	""
 #define ORIGINAL_FILENAME	""
 #define PRODUCT_NAME	""
-#define PRODUCT_VERSION	"0.1.1.2"
+#define PRODUCT_VERSION	"0.1.2.10"
 
 #endif /*PAOPAOTANG_PRIVATE_H*/

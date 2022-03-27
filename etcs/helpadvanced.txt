@@ -3,3 +3,4 @@ load - load the game (uncompleted)
 load-map - load map from certain file
 save-map - save map to certain file
 map-edit - enter the mapEditor command line
+set-factor - set the generateItem factor to 1/value (if nonpostive value is given, the random generation will be disabled)

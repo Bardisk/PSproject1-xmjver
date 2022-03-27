@@ -213,7 +213,7 @@ int drawSettings::calHit(int pos){
 }
 
 bool player::isBanMove(char ch){
-	for (int i = 0; i < strlen(banMove); i++)
+	for (int i = 0; i < (int) strlen(banMove); i++)
 		if (banMove[i] == ch) return true;
 	return false;
 }

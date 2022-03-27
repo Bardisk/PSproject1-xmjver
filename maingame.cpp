@@ -109,7 +109,7 @@ void mainGame::refresh(){
 		dss.addPlayer(&players[i]);
 	}
 	gameMap->draw(dss);
-	puts("ESC - Exit \t P - Pause");
+	puts("\033[96mESC - Exit\033[0m\t\t\033[96mP - Pause\033[0m");
 	fflush(stdout);
 	return ;
 }
